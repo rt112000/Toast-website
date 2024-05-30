@@ -7,55 +7,50 @@ app.secret_key = "super secret key"
 '''home page'''
 @app.route('/')
 def home():
-    if not session.get('logged_in'):
+    if not session.get('username'):
         return render_template('signup.html')
-    elif Flag == True:
+    else:
         text = 'this username is taken'
         return render_template('signup.html', text = text)
-    else:
-        return render_template('myreviews.html')
-    
-@app.route('/login')
-def test():
-    return render_template('login.html')
-
 
 '''sign up'''
 @app.route('/signup', methods = ['POST'])
 def signup():
-    render_template('signup.html')
-    global username
     username = request.form['username']
     password = request.form['password']
     connection = sqlite3.connect('toast.db')
     cursor = connection.cursor()
     #Mike Rhodes - Stack overflow :skull:
     cursor.execute("SELECT username FROM users WHERE username = '{}'".format(username))
-    if cursor.fetchone is not None:
+    key = cursor.fetchone()
+    if key is not None:
         flash('this username is taken')
-        global Flag
-        Flag = True
-        return home()
+        text = 'this username is taken'
+        return render_template('signup.html', text = text)
     else:
         cursor.execute("INSERT INTO users(username, password) VALUES('{}', '{}')".format(username, password))
         connection.commit()
-        session['logged_in'] = True
+        session['username'] = username
         return(home())
 
+@app.route('/login')
+def test():
+    return render_template('login.html')
 
-@app.route('/login-verfication', methods = ['POST'])
+@app.route('/login', methods = ['POST'])
 def login():
-        render_template('login.html')
         password = request.form['password'] 
-        global username
         username = request.form['username']
         connection = sqlite3.connect('toast.db')
         cursor = connection.cursor()
         cursor.execute("SELECT password FROM users WHERE username = '{}'".format(username))
-        key = cursor.fetchone()
+        key = cursor.fetchone()        
         connection.close()
-        if key[0] == password:   
-            session['logged_in'] = True
+
+        if key is None:
+            return 'User not found!'
+        if key[0] == password:
+            session['username'] = username
             return(user_reviews())
         else:
             return 'wrong password!'
@@ -63,14 +58,18 @@ def login():
 '''shows user reviews'''
 @app.route('/my-reviews')
 def user_reviews():
-    if not session.get('logged_in'):
+    username = session.get('username')
+    if not username:
         return render_template('signup.html')
     else:
             connection = sqlite3.connect('toast.db')
             cursor = connection.cursor()
-            cursor.execute("SELECT review FROM reviews WHERE username = '{}'".format(username))
+            cursor.execute("SELECT review FROM reviews as r JOIN users as u on r.user_id = u.id WHERE u.username = '{}'".format(username))
             reviews = cursor.fetchall()
-            return render_template('myreviews.html', reviews = reviews)
+            if reviews is None:
+                return 'dfkfdjkdjk'
+            else:
+                return render_template('myreviews.html', reviews = reviews)
 
 '''shows all reviews'''
 @app.route('/reviews')
