@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, flash
+from flask import Flask, render_template, request, session, flash, redirect, url_for
 import sqlite3
 
 app = Flask(__name__)
@@ -8,10 +8,13 @@ app.secret_key = "super secret key"
 @app.route('/')
 def home():
     if not session.get('username'):
-        return render_template('signup.html')
+        return redirect(url_for('signup'))
     else:
-        text = 'this username is taken'
-        return render_template('signup.html', text = text)
+        return render_template('home.html')
+
+@app.route('/signup')
+def signup_get():
+    return render_template('signup.html')
 
 '''sign up'''
 @app.route('/signup', methods = ['POST'])
@@ -31,7 +34,7 @@ def signup():
         cursor.execute("INSERT INTO users(username, password) VALUES('{}', '{}')".format(username, password))
         connection.commit()
         session['username'] = username
-        return(home())
+        return(redirect(url_for('home')))
 
 @app.route('/login')
 def test():
@@ -51,7 +54,7 @@ def login():
             return 'User not found!'
         if key[0] == password:
             session['username'] = username
-            return(user_reviews())
+            return redirect(url_for('user_reviews'))
         else:
             return 'wrong password!'
 
