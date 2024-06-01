@@ -10,6 +10,7 @@ def home():
     username = session.get('username')
     if username:
         flash('Hi {}, welcome to Toast Website!'.format(session.get('username')))
+        flash('haha, flash again')
     return render_template('home.html', username = username)
 
 @app.route('/signup')
