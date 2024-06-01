@@ -1,28 +1,10 @@
-<!DOCTYPE html>
-<html>
-
-    <head>
-        <title>
-            Toast
-        </title>
-    </head>
-
-    <body>
-        <header>
-            <h1> TOAST</h1>
-        </header>
-
-        <nav>
-            NAVBAR
-        </nav>
-
-        <main>
-
-        </main>
-
-        <footer>
-            <p>the footer</p>
-        </footer>
-    </body>
-
-</html>
+{% extends "layout.html" %}
+{% block body %}
+  <h1>Overview</h1>
+  {% if username %}
+  <p>Check my <a href="{{ url_for('myreviews') }}">Reviews</a></p>
+  <p><a href="{{ url_for('logout') }}">Logout</a></p>
+  {% else %}
+  <p>Do you want to <a href="{{ url_for('login') }}">log in?</a></p>
+  {% endif %}
+{% endblock %}

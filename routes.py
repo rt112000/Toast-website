@@ -7,10 +7,10 @@ app.secret_key = "super secret key"
 '''home page'''
 @app.route('/')
 def home():
-    if not session.get('username'):
-        return redirect(url_for('signup'))
-    else:
-        return render_template('home.html')
+    username = session.get('username')
+    if username:
+        flash('Hi {}, welcome to Toast Website!'.format(session.get('username')))
+    return render_template('home.html', username = username)
 
 @app.route('/signup')
 def signup_get():
@@ -27,9 +27,8 @@ def signup():
     cursor.execute("SELECT username FROM users WHERE username = '{}'".format(username))
     key = cursor.fetchone()
     if key is not None:
-        flash('this username is taken')
-        text = 'this username is taken'
-        return render_template('signup.html', text = text)
+        error = 'this username is taken!'
+        return render_template('signup.html', error = error)
     else:
         cursor.execute("INSERT INTO users(username, password) VALUES('{}', '{}')".format(username, password))
         connection.commit()
@@ -47,30 +46,37 @@ def login():
         connection = sqlite3.connect('toast.db')
         cursor = connection.cursor()
         cursor.execute("SELECT password FROM users WHERE username = '{}'".format(username))
-        key = cursor.fetchone()        
+        key = cursor.fetchone()
         connection.close()
 
         if key is None:
-            return 'User not found!'
+            error = 'User not found!'
+            return render_template('login.html', error = error)
         if key[0] == password:
             session['username'] = username
-            return redirect(url_for('user_reviews'))
+            return redirect(url_for('home'))
         else:
-            return 'wrong password!'
+            error = 'Wrong password!'
+            return render_template('login.html', error = error)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return(redirect(url_for('home')))
 
 '''shows user reviews'''
-@app.route('/my-reviews')
-def user_reviews():
+@app.route('/myreviews')
+def myreviews():
     username = session.get('username')
     if not username:
-        return render_template('signup.html')
+        return(redirect(url_for('login')))
     else:
             connection = sqlite3.connect('toast.db')
             cursor = connection.cursor()
             cursor.execute("SELECT review FROM reviews as r JOIN users as u on r.user_id = u.id WHERE u.username = '{}'".format(username))
             reviews = cursor.fetchall()
-            if reviews is None:
-                return 'dfkfdjkdjk'
+            if len(reviews) == 0:
+                return render_template('myreviews.html', error = 'No review found!')
             else:
                 return render_template('myreviews.html', reviews = reviews)
 

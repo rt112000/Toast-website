@@ -1,21 +1,23 @@
-<!DOCTYPE html>
-
-<head>
-amongus
-</head>
-
-<body>
-  {% block body %}
+{% extends "layout.html" %}
+{% block body %}
+  <h1>Login</h1>
+  {% if error %}
+    <p class=error><strong>Error:</strong> {{ error }}</p>
+    {% if error == 'User not found!' %}
+    <p>Do you want to <a href="{{ url_for('signup') }}">Sign up</a>?</p>
+    {% endif %}
+  {% endif %}
   {% if session['logged_in'] %}
-
   You're logged in already!
-
   {% else %}
-  <form action="/login" method="POST">
-    <input type="username" name="username" placeholder="Username">
-    <input type="password" name="password" placeholder="Password">
-    <input type="submit" value="Log in">
+  <form method="post">
+    <dl>
+      <dt>Username:
+      <dd><input type="text" name="username" value="{{request.form.username }}">
+      <dt>Password:
+      <dd><input type="password" name="password">
+    </dl>
+    <p><input type="submit" value="Login">
   </form>
   {% endif %}
-  {% endblock %}
-</body>
+{% endblock %}

@@ -1,37 +1,17 @@
-<!DOCTYPE html>
-<html>
-
-    <head>
-        <title>
-            My Site
-        </title>
-    </head>
-
-    <body>
-        <header>
-            <h1> Signup</h1>
-        </header>
-
-        <nav>
-            NAVBAR
-        </nav>
-
-        <main>
-            <form action="/signup" method="POST">
-                <input type="username" name="username" placeholder="Username">
-                <input type="password" name="password" placeholder="Password">
-                <input type="submit" value="Sign up">
-            </form>
-
-            <br>{{text}}<br>
-
-            <br>already have an account?</br>
-            <a href="/login">Log in</a>
-        </main>
-
-        <footer>
-            <p>the footer</p>
-        </footer>
-    </body>
-
-</html> 
+{% extends "layout.html" %}
+{% block body %}
+  <h1>Sign up</h1>
+  {% if error %}
+    <p class="error"><strong>Error:</strong> {{ error }} </p>
+    <p>Do you want to <a href="{{ url_for('login') }}">Login</a>?</p>
+  {% endif %}
+  <form method="post">
+    <dl>
+      <dt>Username:
+      <dd><input type="text" name="username" value="{{request.form.username }}">
+      <dt>Password:
+      <dd><input type="password" name="password">
+    </dl>
+    <p><input type="submit" value="Sign up">
+  </form>
+{% endblock %}
